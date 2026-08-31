@@ -7,7 +7,7 @@ import Image from "next/image";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
-import CBG from "../components/img/CBG.png";
+import CBG from "@/components/img/CBG.png";
 
 import {
   ArrowRight,
@@ -30,7 +30,7 @@ export default function HeroSection({ city }) {
     const fetchHeroData = async () => {
       try {
         const snap = await getDoc(
-          doc(db, "websites", "centralbiomedicals", "pages", "home")
+          doc(db, "websites", "haemoglobinmetercom", "pages", "home")
         );
 
         if (snap.exists()) {
@@ -123,9 +123,9 @@ export default function HeroSection({ city }) {
               </>
             ) : (
               <>
-                <Link href={makeLink("/services")}>
+                <Link href={makeLink("/items")}>
                   <button className="primary-btn flex items-center gap-2">
-                    {heroData.button1Text || "Explore Services"}
+                    {heroData.button1Text || "Explore Products"}
                     <ArrowRight size={18} />
                   </button>
                 </Link>
@@ -183,7 +183,7 @@ export default function HeroSection({ city }) {
           <div className="glass-card rounded-[40px] p-6 card-shadow">
             <Image
               src={CBG}
-              alt="Central Biomedical"
+              alt="Raj Biosis"
               width={1200}
               height={900}
               className="rounded-[28px] object-cover object-[20%_center] h-[350px] sm:h-[450px] lg:h-[550px] w-full"

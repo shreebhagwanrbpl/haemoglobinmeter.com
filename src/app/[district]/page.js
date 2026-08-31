@@ -8,5 +8,5 @@ export default async function DistrictPage({ params }) {
     .replace(/-/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
 
-  return <Home city={city} />;
+  return <div className="site2-static"><Home city={city} /></div>;
 }

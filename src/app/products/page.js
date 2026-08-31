@@ -175,9 +175,9 @@ export default function ProductsPage() {
   };
 
   return (
-  <>
+  <div className="site2-static">
     <PageBanner
-      title="Our Products"
+      title="Haemoglobin Measurement Range"
       subtitle="Explore advanced biomedical and diagnostic equipment designed for modern healthcare excellence."
     />
 
@@ -475,7 +475,7 @@ export default function ProductsPage() {
         <div className="max-w-7xl mx-auto px-5">
 
           <SectionTitle
-            badge="Why Choose Our Products"
+            badge="Why Choose Haemoglobin Measurement Range"
             title="Trusted Quality & Innovation"
             description="Every product is manufactured to meet international quality standards with reliable support."
             center
@@ -547,7 +547,7 @@ export default function ProductsPage() {
 
       <CTASection />
 
-    </>
+    </div>
 
   );
 

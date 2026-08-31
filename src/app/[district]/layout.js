@@ -1,17 +1,25 @@
+import { fetchDistrictData } from "@/lib/data-fetcher";
+import { notFound } from "next/navigation";
+
 export async function generateMetadata({ params }) {
+  const { district } = await params;
+  if (!district) return {};
 
-  const { district = "jaipur" } = await params;
+  const districtData = await fetchDistrictData(district);
+  if (!districtData) {
+    notFound();
+  }
 
-  const districtName = district
+  const districtName = districtData.district || district
     .replace(/-/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
 
-  const url = `https://centralbiomedical.com/${district}`;
+  const url = `https://haemoglobinmeter.com/${district}`;
 
   return {
-    title: `Biomedical & Diagnostic Equipment Supplier in ${districtName} | Central Biomedical`,
+    title: `Biomedical & Diagnostic Equipment Supplier in ${districtName} | Raj Biosis`,
 
-    description: `Central Biomedical supplies diagnostic machines, laboratory equipment, reagents and biomedical products in ${districtName}.`,
+    description: `Raj Biosis supplies diagnostic machines, laboratory equipment, reagents and biomedical products in ${districtName}, ${districtData.state || "India"}.`,
 
     keywords: [
       `Biomedical Equipment ${districtName}`,
@@ -39,6 +47,12 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default function DistrictLayout({ children }) {
+export default async function DistrictLayout({ children, params }) {
+  const { district } = await params;
+  const districtData = await fetchDistrictData(district);
+  if (!districtData) {
+    notFound();
+  }
+
   return children;
 }

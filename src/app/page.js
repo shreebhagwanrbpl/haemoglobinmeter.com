@@ -6,9 +6,10 @@ import ServicesPreview from "@/components/ServicesPreview";
 import Testimonials from "@/components/Testimonials";
 import CTASection from "@/components/CTASection";
 import SeoContent from "@/components/SeoContent";
+
 export default function Home({ city = "" }) {
   return (
-    <>
+    <div className="site2-static">
       <HeroSection city={city} />
       <TrustedBrands city={city} />
       <WhyChooseUs city={city} />
@@ -17,6 +18,6 @@ export default function Home({ city = "" }) {
       <SeoContent city={city} />
       <Testimonials city={city} />
       <CTASection city={city} />
-    </>
+    </div>
   );
 }

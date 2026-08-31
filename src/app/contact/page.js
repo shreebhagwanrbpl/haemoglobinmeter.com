@@ -84,7 +84,7 @@ export default function ContactPage() {
         collection(
           db,
           "websitesQueries",
-          "centralbiomedicals",
+          "haemoglobinmetercom",
           "contactQueries"
         ),
         {
@@ -129,7 +129,7 @@ export default function ContactPage() {
           doc(
             db,
             "websites",
-            "centralbiomedicals",
+            "haemoglobinmetercom",
             "districts",
             currentDistrict
           )
@@ -152,7 +152,7 @@ export default function ContactPage() {
           doc(
             db,
             "websites",
-            "centralbiomedicals",
+            "haemoglobinmetercom",
             "pages",
             "contact"
           )
@@ -175,25 +175,19 @@ export default function ContactPage() {
 
 
 
-  const phone =
-    contactInfo.find(
-      (x) => x.label === "Phone Number"
-    )?.value || "";
+  const getContactValue = (labelKeys, fallback = "") => {
+    const found = contactInfo.find((x) =>
+      labelKeys.some((k) => x.label?.toLowerCase() === k.toLowerCase())
+    );
+    return found && found.value !== null && found.value !== undefined
+      ? String(found.value)
+      : fallback;
+  };
 
-  const email =
-    contactInfo.find(
-      (x) => x.label === "Email Address"
-    )?.value || "";
-
-  const address =
-    contactInfo.find(
-      (x) => x.label === "Office Address"
-    )?.value || "";
-
-  const hours =
-    contactInfo.find(
-      (x) => x.label === "Working Hours"
-    )?.value || "";
+  const phone = getContactValue(["phone", "direct mobile", "mobile", "contact"]);
+  const email = getContactValue(["email", "official email", "mail"]);
+  const address = getContactValue(["address", "office address", "location"]);
+  const hours = getContactValue(["working hours", "hours", "timing"]);
 
   const dynamicAddress =
     districtData
@@ -205,7 +199,8 @@ export default function ContactPage() {
   );
   if (loading) {
     return (
-      <section className="section-padding">
+      <div className="site2-static">
+<section className="section-padding">
         <div className="container-custom">
 
           <div className="grid lg:grid-cols-2 gap-12">
@@ -234,14 +229,15 @@ export default function ContactPage() {
 
         </div>
       </section>
+      </div>
     );
   }
   return (
-    <>
+    <div className="site2-static">
       {/* Banner */}
       <PageBanner
         title="Contact Us"
-        subtitle="Get in touch with Central Biomedicals for premium diagnostic and biomedical solutions."
+        subtitle="Talk to our haemoglobin diagnostics team for premium diagnostic and biomedical solutions."
       />
 
       {/* Contact Section */}
@@ -276,7 +272,7 @@ export default function ContactPage() {
 
                 <div>
                   <h4 className="font-semibold text-lg">
-                    Phone Number
+                    Direct Mobile
                   </h4>
 
                   <p className="text-slate-600 mt-2">
@@ -292,7 +288,7 @@ export default function ContactPage() {
 
                 <div>
                   <h4 className="font-semibold text-lg">
-                    Email Address
+                    Official Email
                   </h4>
 
                   <p className="text-slate-600 mt-2">
@@ -340,7 +336,7 @@ export default function ContactPage() {
           <div className="bg-white rounded-[40px] p-8 lg:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.08)]">
 
             <h3 className="text-3xl font-bold text-slate-900">
-              Send Us Message
+              Discuss Your Hb Requirement
             </h3>
 
             <p className="text-slate-500 mt-3">
@@ -356,7 +352,7 @@ export default function ContactPage() {
               <input
                 type="text"
                 name="name"
-                placeholder="Full Name"
+                placeholder="Professional Name"
                 value={form.name}
                 onChange={handleChange}
                 className="w-full border border-slate-200 rounded-2xl px-5 py-4 outline-none focus:border-sky-600"
@@ -365,7 +361,7 @@ export default function ContactPage() {
               <input
                 type="email"
                 name="email"
-                placeholder="Email Address"
+                placeholder="Official Email"
                 value={form.email}
                 onChange={handleChange}
                 className="w-full border border-slate-200 rounded-2xl px-5 py-4 outline-none focus:border-sky-600"
@@ -374,7 +370,7 @@ export default function ContactPage() {
               <input
                 type="tel"
                 name="phone"
-                placeholder="Phone Number"
+                placeholder="Direct Mobile"
                 maxLength={10}
                 value={form.phone}
                 onChange={(e) =>
@@ -389,7 +385,7 @@ export default function ContactPage() {
               <input
                 type="text"
                 name="subject"
-                placeholder="Subject"
+                placeholder="Testing Requirement"
                 value={form.subject}
                 onChange={handleChange}
                 className="w-full border border-slate-200 rounded-2xl px-5 py-4 outline-none focus:border-sky-600"
@@ -398,7 +394,7 @@ export default function ContactPage() {
               <textarea
                 rows={5}
                 name="message"
-                placeholder="Your Message"
+                placeholder="Describe your testing requirement"
                 value={form.message}
                 onChange={handleChange}
                 className="w-full border border-slate-200 rounded-2xl px-5 py-4 outline-none focus:border-sky-600 resize-none"
@@ -438,6 +434,6 @@ export default function ContactPage() {
 
       {/* CTA */}
       <CTASection />
-    </>
+    </div>
   );
 }

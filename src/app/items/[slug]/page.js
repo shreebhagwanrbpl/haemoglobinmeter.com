@@ -1,17 +1,26 @@
 import ProductDetails from "./ProductDetails";
+import { fetchFullCatalog } from "@/lib/data-fetcher-server";
+import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }) {
     const { slug } = await params;
 
-    const productName = slug
-        ?.replace(/-/g, " ")
-        ?.replace(/\b\w/g, (c) => c.toUpperCase());
+    const allProducts = await fetchFullCatalog();
+    const product = allProducts.find((p) => p.slug === slug);
 
-    const title = `${productName} Supplier in India | Price, Dealer & Distributor | Central Biomedicals`;
+    if (!product) {
+        return {
+            robots: {
+                index: false,
+                follow: false,
+            }
+        };
+    }
 
-    const description = `Buy ${productName} at best price in India. Trusted supplier, dealer and distributor of ${productName} for hospitals, laboratories, diagnostic centers, research institutes and healthcare facilities. Contact Central Biomedicals for latest quotation and product details.`;
-
-    const url = `https://centralbiomedicals.com/items/${slug}`;
+    const productName = product.title;
+    const title = `${productName} Supplier in India | Price, Dealer & Distributor | Raj Biosis`;
+    const description = `Buy ${productName} at best price in India. Trusted supplier, dealer and distributor of ${productName} for hospitals, laboratories, diagnostic centers. Contact Raj Biosis for latest quotation.`;
+    const url = `https://haemoglobinmeter.com/items/${slug}`;
 
     return {
         title,
@@ -22,24 +31,13 @@ export async function generateMetadata({ params }) {
             `${productName} Supplier`,
             `${productName} Dealer`,
             `${productName} Distributor`,
-            `${productName} Manufacturer`,
-            `${productName} Exporter`,
             `${productName} Price`,
-            `${productName} Price in India`,
             `${productName} Supplier in India`,
-            `${productName} Dealer in India`,
-            `${productName} Distributor in India`,
-            `Buy ${productName}`,
-            `${productName} for Laboratory`,
-            `${productName} for Hospital`,
-            `${productName} for Diagnostic Center`,
             "Biomedical Equipment",
-            "Medical Equipment",
             "Laboratory Equipment",
             "Diagnostic Equipment",
             "Hospital Equipment",
-            "Healthcare Equipment",
-            "Central Biomedicals",
+            "Raj Biosis",
         ],
 
         alternates: {
@@ -50,7 +48,7 @@ export async function generateMetadata({ params }) {
             title,
             description,
             url,
-            siteName: "Central Biomedicals",
+            siteName: "Raj Biosis",
             type: "website",
             locale: "en_IN",
         },
@@ -61,24 +59,19 @@ export async function generateMetadata({ params }) {
             description,
         },
 
-        robots: {
-            index: true,
-            follow: true,
-            googleBot: {
-                index: true,
-                follow: true,
-                "max-video-preview": -1,
-                "max-image-preview": "large",
-                "max-snippet": -1,
-            },
-        },
-
-        metadataBase: new URL("https://centralbiomedials.com"),
+        metadataBase: new URL("https://haemoglobinmeter.com"),
     };
 }
 
 export default async function Page({ params }) {
     const { slug } = await params;
 
-    return <ProductDetails slug={slug} />;
-}
+    const allProducts = await fetchFullCatalog();
+    const product = allProducts.find((p) => p.slug === slug);
+
+    if (!product) {
+        notFound();
+    }
+
+    return <ProductDetails slug={slug} initialProduct={product} />;
+}

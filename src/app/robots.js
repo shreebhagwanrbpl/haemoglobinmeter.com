@@ -3,9 +3,15 @@ export default function robots() {
         rules: {
             userAgent: "*",
             allow: "/",
+            disallow: [
+                "/admin",
+                "/dashboard",
+                "/api/",
+                "/search",
+                "/*?*", // Block query parameters to prevent crawling duplicate filter/sorting combinations
+            ],
         },
 
-        sitemap:
-            "https://centralbiomedicals.com/sitemap.xml",
+        sitemap: "https://haemoglobinmeter.com/sitemap.xml",
     };
 }

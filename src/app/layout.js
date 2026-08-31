@@ -4,75 +4,51 @@ import Footer from "@/components/Footer";
 import { Toaster } from "react-hot-toast";
 
 export const metadata = {
-  metadataBase: new URL(
-    "https://centralbiomedicals.com"
-  ),
-
-  title:
-    "Biomedical Equipment Supplier in India | Central Biomedicals",
-
-  description:
-    "Central Biomedicals supplies CBC Machines, Hematology Analyzers, Biochemistry Analyzers, ELISA Readers and laboratory equipment across India.",
-
+  metadataBase: new URL("https://haemoglobinmeter.com"),
+  title: "Clinical Haemoglobin Meters & Diagnostic Solutions | Raj Biosis",
+  description: "Explore high-precision clinical haemoglobinometers, automated cell counters, and point-of-care (POC) blood diagnostics for hospitals and pathology clinics.",
   keywords: [
-    "Biomedical Equipment Supplier",
-    "Laboratory Equipment Supplier",
-    "CBC Machine Supplier",
-    "Hematology Analyzer Supplier",
-    "Biochemistry Analyzer Supplier",
-    "Diagnostic Equipment Supplier",
-    "Medical Equipment Supplier India",
+    "Clinical Haemoglobin Meter",
+    "Professional Haemoglobinometer",
+    "POC Haemoglobin Analyzer",
+    "Blood Haemoglobin Testing",
+    "Portable Haemoglobinometer",
+    "Automated Hb Meter",
+    "Hospital Haemoglobin Meter",
+    "Diagnostics Haemoglobin Testing"
   ],
-
   openGraph: {
-    title:
-      "Biomedical Equipment Supplier in India | Central Biomedicals",
-
-    description:
-      "Supplier of biomedical and laboratory equipment across India.",
-
-    url: "https://centralbiomedicals.com",
-
-    siteName: "Central Biomedicals",
-
+    title: "Clinical Haemoglobin Meters & Diagnostic Solutions | Raj Biosis",
+    description: "Supplier of clinical-grade haemoglobinometers and automated hematology testing systems.",
+    url: "https://haemoglobinmeter.com",
+    siteName: "Raj Biosis",
     images: [
       {
         url: "/logo.png",
         width: 1200,
         height: 630,
-        alt: "Central Biomedicals",
+        alt: "Raj Biosis Diagnostics",
       },
     ],
-
     locale: "en_US",
     type: "website",
   },
-
   twitter: {
     card: "summary_large_image",
-
-    title:
-      "Biomedical Equipment Supplier in India | Central Biomedicals",
-
-    description:
-      "Supplier of biomedical and laboratory equipment across India.",
-
+    title: "Clinical Haemoglobin Meters & Diagnostic Solutions | Raj Biosis",
+    description: "Clinical-grade haemoglobinometers and diagnostic systems across India.",
     images: ["/logo.png"],
   },
-
   alternates: {
-    canonical: "https://centralbiomedicals.com",
+    canonical: "https://haemoglobinmeter.com",
   },
 };
 
-export default function RootLayout({
-  children,
-}) {
+export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="antialiased">
+      <body className="antialiased" suppressHydrationWarning>
         <Navbar />
-
         <main>
           <Toaster
             position="top-right"
@@ -80,10 +56,8 @@ export default function RootLayout({
               duration: 3000,
             }}
           />
-
           {children}
         </main>
-
         <Footer />
       </body>
     </html>

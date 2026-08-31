@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
@@ -51,12 +51,14 @@ export default function Navbar() {
 
         {/* Logo */}
         <Link href={makeLink("/")}>
-          <h1 className="text-xl md:text-2xl font-bold text-sky-700">
-            Central
-            <span className="text-slate-900">
-              {" "}Biomedicals
-            </span>
-          </h1>
+          <Image
+            src="/logo.png"
+            alt="Raj Biosis"
+            width={90}
+            height={35}
+            priority
+            className="h-auto w-[70px] md:w-[90px] object-contain"
+          />
         </Link>
 
         {/* Desktop Menu */}
