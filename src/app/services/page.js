@@ -1,39 +1,73 @@
 "use client";
-import { Microscope, FlaskConical, ShieldCheck, Stethoscope, Wrench, Activity, CheckCircle2, ArrowRight } from "lucide-react";
+
+import { useEffect, useState } from "react";
+import { db, doc, onSnapshot } from "@/lib/firestore-shim";
+import {
+  Search,
+  ListChecks,
+  FileText,
+  Truck,
+  Settings2,
+  MessageSquareText,
+  CheckCircle2,
+} from "lucide-react";
 import SectionTitle from "@/components/SectionTitle";
 import ServiceCard from "@/components/ServiceCard";
 import CTASection from "@/components/CTASection";
-import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 
 export default function ServicesPage() {
-  const [services, setServices] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const icons = [
-    <Microscope size={30} />,
-    <FlaskConical size={30} />,
-    <ShieldCheck size={30} />,
-    <Stethoscope size={30} />,
-    <Wrench size={30} />,
-    <Activity size={30} />,
+  const fallbackServices = [
+    {
+      icon: <Search size={30} />,
+      title: "Product Finding",
+      description: "Help navigating the catalogue when you know the application or broad type of biomedical item but not the exact model.",
+    },
+    {
+      icon: <ListChecks size={30} />,
+      title: "Specification Shortlisting",
+      description: "Review important parameters such as capacity, method, sample requirements, output and intended workflow.",
+    },
+    {
+      icon: <FileText size={30} />,
+      title: "Requirement Preparation",
+      description: "Turn a long or mixed product list into a clearer enquiry with the relevant item and specification details.",
+    },
+    {
+      icon: <Truck size={30} />,
+      title: "Supply Enquiry Support",
+      description: "Coordinate discussions around individual products or combined institutional requirements, subject to availability.",
+    },
+    {
+      icon: <Settings2 size={30} />,
+      title: "Equipment Guidance",
+      description: "Where applicable, assist with questions about installation needs, operating considerations and related equipment items.",
+    },
+    {
+      icon: <MessageSquareText size={30} />,
+      title: "Pre-Purchase Discussion",
+      description: "Clarify product information before a buyer moves from catalogue browsing to a commercial enquiry.",
+    },
   ];
 
+  const [services, setServices] = useState(fallbackServices);
+
   useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const snap = await getDoc(doc(db, "websites", "haemoglobinmetercom", "pages", "services"));
-        if (snap.exists()) {
-          setServices(snap.data().services || []);
-        }
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchServices();
+    const ref = doc(db, "__website__", "pages", "services");
+    const unsubscribe = onSnapshot(ref, (snap) => {
+      if (!snap?.exists?.()) return;
+      const data = snap.data() || {};
+      const rawServices = Array.isArray(data) ? data : Array.isArray(data.services) ? data.services : [];
+      const dynamicServices = rawServices.map((item, index) => {
+        const Icon = [Search, ListChecks, FileText, Truck, Settings2, MessageSquareText][index % 6];
+        return {
+          icon: <Icon size={30} />,
+          title: String(item?.title ?? item?.name ?? item?.serviceTitle ?? "").trim(),
+          description: String(item?.desc ?? item?.description ?? item?.details ?? item?.serviceDescription ?? item?.serviceDesc ?? "").trim(),
+        };
+      }).filter((item) => item.title && item.description);
+      if (dynamicServices.length) setServices(dynamicServices);
+    });
+    return unsubscribe;
   }, []);
 
   return (
@@ -42,13 +76,16 @@ export default function ServicesPage() {
         <div className="container-custom">
           <div className="max-w-5xl mx-auto text-center">
             <span className="inline-flex items-center rounded-full bg-sky-50 border border-sky-100 px-5 py-2 text-sm font-semibold text-sky-700">
-              Haemoglobin & Diagnostic Services
+              Biomedical Catalogue Support
             </span>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mt-5 leading-tight">
-              Pathology Laboratory & Clinical Testing Setup Support
+              Assistance for Product Discovery, Review and Enquiry
             </h2>
             <p className="mt-7 text-lg text-slate-600 leading-8">
-              We assist clinical setups, testing centers, and medical units in executing high-precision hemoglobinometer calibrations and automated hematology installs. Our experts focus on ensuring compliance with diagnostic protocols.
+              Our service approach is designed for different biomedical
+              requirements. Whether you are looking for one item or preparing a
+              multi-category list, the focus is on making the product-selection
+              stage easier to navigate.
             </p>
           </div>
         </div>
@@ -57,37 +94,20 @@ export default function ServicesPage() {
       <section className="section-padding bg-sky-50">
         <div className="container-custom">
           <SectionTitle
-            badge="What We Offer"
-            title="Biomedical Operations Support"
-            description="From blood analyzer setup to medical calibration, we provide comprehensive laboratory technical services."
+            badge="Catalogue Assistance"
+            title="Useful Support at Different Stages"
+            description="Choose the kind of help that matches where you are in the buying process."
             center
           />
           <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8 mt-16">
-            {loading
-              ? Array.from({ length: 6 }).map((_, index) => (
-                  <div key={index} className="bg-white rounded-[30px] p-10 border border-sky-100 shadow-sm animate-pulse">
-                    <div className="w-20 h-20 rounded-3xl bg-sky-100 mb-8" />
-                    <div className="h-8 bg-slate-200 rounded mb-6" />
-                    <div className="space-y-3">
-                      <div className="h-4 bg-slate-200 rounded" />
-                      <div className="h-4 bg-slate-200 rounded w-11/12" />
-                    </div>
-                  </div>
-                ))
-              : services.length > 0
-                ? services.map((service, index) => (
-                    <ServiceCard
-                      key={index}
-                      icon={icons[index % icons.length]}
-                      title={service.title}
-                      description={service.desc}
-                    />
-                  ))
-                : (
-                  <div className="lg:col-span-3 text-center py-16">
-                    <p className="text-slate-500">No services currently configured.</p>
-                  </div>
-                )}
+            {services.map((service) => (
+              <ServiceCard
+                key={service.title}
+                icon={service.icon}
+                title={service.title}
+                description={service.description}
+              />
+            ))}
           </div>
         </div>
       </section>
@@ -97,24 +117,27 @@ export default function ServicesPage() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
               <span className="inline-flex rounded-full bg-sky-50 border border-sky-100 px-5 py-2 text-sm font-semibold text-sky-700">
-                Setup Protocol
+                A Simple Route
               </span>
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mt-5">
-                Diagnostics Calibration Built for Confidence
+                From Product Idea to a Better-Defined Requirement
               </h2>
               <p className="mt-6 text-slate-600 leading-8">
-                Accurate hemoglobin testing demands micro-precision calibration and regular validation runs using control blood samples. We work alongside laboratory managers to define custom calibration schedules tailored to high testing volumes.
+                Biomedical purchasing can involve technical terminology,
+                different product formats and several items at once. A clear
+                enquiry gives both sides a better starting point for discussing
+                the exact product needed.
               </p>
             </div>
             <div className="bg-sky-50 rounded-[35px] p-8 lg:p-10 border border-sky-100">
-              <h3 className="text-2xl font-bold text-slate-900">Technical Deliverables</h3>
+              <h3 className="text-2xl font-bold text-slate-900">What to Include</h3>
               <div className="space-y-5 mt-8">
                 {[
-                  "On-site calibration checks against reference standards.",
-                  "System diagnostic updates for cell counter firmware.",
-                  "Detailed documentation for laboratory standard inspections.",
-                  "Operator training for sample preparation and handling.",
-                  "Technical support line for testing inquiries.",
+                  "Product category or intended application.",
+                  "Preferred brand or model, if already known.",
+                  "Important technical parameters or capacity.",
+                  "Required quantity and whether the list contains multiple items.",
+                  "Location and other procurement details relevant to the enquiry.",
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-3">
                     <CheckCircle2 size={22} className="text-sky-700 flex-shrink-0 mt-1" />
@@ -130,28 +153,28 @@ export default function ServicesPage() {
       <section className="section-padding bg-slate-50">
         <div className="container-custom">
           <SectionTitle
-            badge="Laboratory FAQs"
-            title="Service Procedures & Setup FAQ"
-            description="Have questions about diagnostic setups? Here are answers from our biomedical engineering team."
+            badge="Common Questions"
+            title="Biomedical Product Enquiry FAQ"
+            description="A few quick answers for visitors planning a product search or procurement request."
             center
           />
           <div className="max-w-4xl mx-auto mt-12 space-y-5">
             {[
               {
-                q: "What does your calibration service involve?",
-                a: "We calibrate optical sensors, fluidics, and mechanical components of hemoglobin meters and cell counters using standard control blood packs to ensure precise results.",
+                q: "Can you help with products from more than one category?",
+                a: "Yes. A requirement can include different biomedical product families. The enquiry can be shared as a combined list for discussion.",
               },
               {
-                q: "How often should clinical cell counters be serviced?",
-                a: "We recommend professional calibration twice a year or after major test cycles to maintain compliance and avoid data drift.",
+                q: "I know the application but not the model. Can I still enquire?",
+                a: "Yes. Share the intended use and the specifications you know. Those details can be used to narrow the relevant catalogue options.",
               },
               {
-                q: "Do you supply spare parts for Mindray and Sysmex counters?",
-                a: "Yes, we maintain an inventory of key replacement components, tubing, and optical arrays for leading diagnostics brands.",
+                q: "Can I ask about technical specifications before requesting a quotation?",
+                a: "Yes. Product specifications and suitability questions can be discussed before moving to a commercial enquiry.",
               },
               {
-                q: "Can you help set up a new pathology lab?",
-                a: "Yes, we assist from layout planning to complete device selection, procurement, installation, and standard validation.",
+                q: "Is support limited to laboratory instruments?",
+                a: "No. The catalogue can include diagnostic products, kits, reagents, consumables, monitoring devices, accessories and other biomedical items.",
               },
             ].map((item) => (
               <details key={item.q} className="group bg-white rounded-2xl border border-slate-200 p-6">

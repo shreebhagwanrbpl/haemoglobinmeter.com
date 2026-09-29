@@ -1,36 +1,22 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import Image from "next/image";
-import toast from "react-hot-toast";
-
+import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
-
+import Image from "next/image";
+import { toast } from "react-hot-toast";
+import { WEBSITE_ID } from "@/lib/catalog-utils";
+import { db, doc, collection, getDoc, addDoc } from "@/lib/firestore-shim";
+import { fetchFullCatalog } from "@/lib/data-fetcher";
+import { Download } from "lucide-react";
 import {
     FaPlay,
     FaShareAlt,
+    FaLink,
     FaWhatsapp,
     FaFacebook,
     FaInstagram,
-    FaLink,
 } from "react-icons/fa";
 
-import {
-    doc,
-    getDoc,
-    getDocs,
-    addDoc,
-    collection,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { fetchFullCatalog } from "@/lib/data-fetcher";
-import { Download } from "lucide-react";
-const makeSlug = (text = "") =>
-    text
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-");
 export default function ProductDetails({ slug, district, initialProduct }) {
     const [product, setProduct] = useState(initialProduct || null);
     const [imageLoaded, setImageLoaded] = useState(false);
@@ -101,7 +87,7 @@ export default function ProductDetails({ slug, district, initialProduct }) {
         const loadContact = async () => {
             try {
                 const snap = await getDoc(
-                    doc(db, "websites", "haemoglobinmetercom", "pages", "contact")
+                    doc(db, "websites", WEBSITE_ID, "pages", "contact")
                 );
                 if (snap.exists()) {
                     const info = snap.data().contactInfo || [];
@@ -273,7 +259,7 @@ export default function ProductDetails({ slug, district, initialProduct }) {
             "@context": "https://schema.org",
             "@type": "Product",
             name: product.title,
-            image: product.image ? [product.image] : [],
+            image: (Array.isArray(product.images) && product.images.length ? product.images : [product.image]).filter(Boolean),
             description:
                 product.desc ||
                 product.description ||
@@ -494,11 +480,18 @@ ${product?.desc}
 
 
                                     <Image
-                                        src={selectedImage || product.image}
+                                        src={selectedImage || product.image || "/placeholder.svg"}
+                                        unoptimized
                                         alt={product.title}
                                         fill
                                         priority
                                         onLoad={() => setImageLoaded(true)}
+                                        onError={() => {
+                                            if (selectedImage !== "/placeholder.svg") {
+                                                setSelectedImage("/placeholder.svg");
+                                            }
+                                            setImageLoaded(true);
+                                        }}
                                         className={`
           object-contain 
           p-4 
@@ -523,16 +516,17 @@ ${product?.desc}
                         <div className="flex flex-wrap gap-3 mt-5">
 
 
-                            {(product.images?.length
+                            {(Array.isArray(product.images) && product.images.length
                                 ? product.images
-                                : [product.image]
-                            ).map((img, index) => (
+                                : [product.image || "/placeholder.svg"]
+                            ).filter(Boolean).map((img, index) => (
 
 
                                 <button
                                     key={index}
                                     onClick={() => {
-                                        setSelectedImage(img);
+                                        setImageLoaded(false);
+                                        setSelectedImage(img || "/placeholder.svg");
                                         setSelectedMedia("image");
                                     }}
                                     className={`
@@ -554,8 +548,13 @@ ${product?.desc}
 
 
                                     <Image
-                                        src={img}
-                                        alt=""
+                                        src={img || "/placeholder.svg"}
+                                        unoptimized
+                                        onError={(event) => {
+                                            event.currentTarget.onerror = null;
+                                            event.currentTarget.src = "/placeholder.svg";
+                                        }}
+                                        alt={product.title ? `${product.title} image ${index + 1}` : "Product image"}
                                         width={80}
                                         height={80}
                                         className="w-full h-full object-cover"

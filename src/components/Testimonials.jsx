@@ -3,21 +3,18 @@ import { motion } from "framer-motion";
 import SectionTitle from "./SectionTitle";
 
 export default function Testimonials() {
-  const reviews = [
+  const perspectives = [
     {
-      name: "Dr. A. K. Sen",
-      role: "Chief Pathologist",
-      review: "The automated haemoglobin meters from Raj Biosis have dramatically enhanced our daily testing capacity.",
+      title: "For Diagnostic Centres",
+      text: "A practical catalogue for building mixed requirements across instruments, kits, reagents and routine consumables.",
     },
     {
-      name: "S. Mukherjee",
-      role: "Clinic Director",
-      review: "Excellent POC diagnostics supplier. Their technical support team was present on-site to handle setup and training.",
+      title: "For Hospital Teams",
+      text: "Useful when several departments need different biomedical items and the purchase cannot be reduced to one equipment category.",
     },
     {
-      name: "Dr. Priya Nair",
-      role: "Hematology Head",
-      review: "Highly accurate blood analyzers. The calibration services have kept our laboratory fully compliant.",
+      title: "For Laboratories",
+      text: "Specification-focused browsing makes it easier to shortlist products before sending a detailed requirement for quotation.",
     },
   ];
 
@@ -25,27 +22,24 @@ export default function Testimonials() {
     <section className="section-padding bg-white">
       <div className="container-custom">
         <SectionTitle
-          badge="Testimonials"
-          title="Lab Specialists Feedback"
-          description="Hear from path labs, clinics, and hematology departments across India."
+          badge="Built Around Real Buying Tasks"
+          title="Different Buyers, Different Requirements"
+          description="The catalogue is designed to accommodate the varied product lists that healthcare and laboratory teams work with."
           center
         />
         <div className="grid lg:grid-cols-3 gap-8 mt-16">
-          {reviews.map((item, index) => (
+          {perspectives.map((item, index) => (
             <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 40 }}
+              key={item.title}
+              initial={{ opacity: 0, y: 35 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.15 }}
+              transition={{ duration: 0.45, delay: index * 0.1 }}
               viewport={{ once: true }}
               className="bg-slate-50 rounded-[32px] p-8 border border-slate-100 card-shadow"
             >
-              <div className="flex gap-1 text-yellow-400 text-xl mb-5">★★★★★</div>
-              <p className="text-slate-600 leading-8 italic">"{item.review}"</p>
-              <div className="mt-8">
-                <h4 className="font-semibold text-lg">{item.name}</h4>
-                <p className="text-slate-500">{item.role}</p>
-              </div>
+              <div className="text-sky-700 text-3xl mb-5">◆</div>
+              <h3 className="text-2xl font-bold text-slate-900">{item.title}</h3>
+              <p className="text-slate-600 leading-8 mt-4">{item.text}</p>
             </motion.div>
           ))}
         </div>

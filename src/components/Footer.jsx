@@ -1,19 +1,31 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { useState, useEffect } from "react";
+
+import {
+  db,
+  doc,
+  collection,
+  getDoc,
+  getDocs,
+  addDoc,
+  onSnapshot,
+} from "@/lib/firestore-shim";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
 import {
   Mail,
   Phone,
   MapPin,
 } from "lucide-react";
+
 import {
   FaFacebookF,
   FaInstagram,
 } from "react-icons/fa";
+
 import { fetchFullCatalog } from "@/lib/data-fetcher";
 
 export default function Footer() {
@@ -264,7 +276,7 @@ export default function Footer() {
 
             <p className="mt-5 text-slate-600 leading-7">
 
-              Distributor of clinical-grade haemoglobin meters and automated diagnostics. Supporting hospital laboratories with high-accuracy instrumentation and technical services.
+              A multi-category biomedical catalogue for laboratory equipment, diagnostic products, reagents, kits, consumables, monitoring devices and related supplies.
 
             </p>
 
@@ -288,7 +300,7 @@ export default function Footer() {
                   justify-center
                   text-sky-700
                   hover:bg-sky-700
-                  hover:text-white
+                  hover:!text-white
                   hover:border-sky-700
                   transition
                   shadow-sm
@@ -313,7 +325,7 @@ export default function Footer() {
                   justify-center
                   text-sky-700
                   hover:bg-sky-700
-                  hover:text-white
+                  hover:!text-white
                   hover:border-sky-700
                   transition
                   shadow-sm
@@ -565,8 +577,7 @@ export default function Footer() {
           </p>
 
           <p className="mt-3 md:mt-0">
-            Designed with precision for
-            modern diagnostics.
+            A practical starting point for biomedical product discovery.
           </p>
 
         </div>

@@ -1,0 +1,16 @@
+Haemoglobinmeter.com Product Detail Page Fix
+
+Changes included:
+- Corrected the client component directive and imports in ProductDetails.js.
+- Added toast import used by validation, share, enquiry, and brochure messages.
+- Added unoptimized image rendering so third-party image URLs do not fail Next.js image-host validation.
+- Added safe image fallbacks and filtered empty gallery images.
+- Updated Product schema image gallery and corrected breadcrumb domain to haemoglobinmeter.com.
+- Added 5.imimg.com to next.config.mjs remotePatterns.
+- Corrected product enquiry storage path to websitesQueries/haemoglobinmetercom/productQueries, matching the SuperAdmin query structure.
+- Added public/placeholder.svg as an image fallback.
+
+Database note:
+The uploaded website ZIP did not contain data/catalog.db. The application expects the shared SQLite DB at ../SuperAdminRBPL/data/catalog.db by default, or the path set by SQLITE_DB_PATH. Product records themselves could not be inspected without that database. Keep the database available at the configured path before running the site.
+
+After replacing files, restart the dev server. A full Next.js build could not be completed in this environment because npm dependency installation did not finish and the Next.js executable was unavailable.

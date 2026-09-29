@@ -1,5 +1,5 @@
 import ServicesPage from "@/app/services/page";
-import { fetchDistrictData } from "@/lib/data-fetcher";
+import { fetchDistrictData } from "@/lib/data-fetcher-server";
 import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }) {
@@ -11,8 +11,8 @@ export async function generateMetadata({ params }) {
   const stateName = districtData.state || "India";
 
   return {
-    title: `Biomedical & Laboratory Services in ${districtName} | Raj Biosis`,
-    description: `Professional medical laboratory and hospital equipment services in ${districtName}, ${stateName}. We provide product consultation, installation and AMC support.`,
+    title: `Biomedical Product Support in ${districtName} | Raj Biosis`,
+    description: `Product discovery and biomedical procurement assistance in ${districtName}, ${stateName}, for equipment, kits, reagents, consumables and related items.`,
     alternates: {
       canonical: `https://haemoglobinmeter.com/${district}/services`,
     },

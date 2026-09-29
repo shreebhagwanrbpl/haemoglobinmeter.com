@@ -1,29 +1,13 @@
 "use client";
 import { motion } from "framer-motion";
-import { Users, FlaskConical, BadgeCheck, Building2 } from "lucide-react";
+import { ListTree, SlidersHorizontal, FileSearch, Building2 } from "lucide-react";
 
 export default function StatsSection() {
   const stats = [
-    {
-      icon: <Building2 size={34} />,
-      number: "10+ Years",
-      label: "Industry Leadership",
-    },
-    {
-      icon: <FlaskConical size={34} />,
-      number: "500+ Units",
-      label: "Installed Nationwide",
-    },
-    {
-      icon: <Users size={34} />,
-      number: "200+ Labs",
-      label: "Trusted Partners",
-    },
-    {
-      icon: <BadgeCheck size={34} />,
-      number: "100%",
-      label: "Accuracy Commitment",
-    },
+    { icon: <ListTree size={34} />, number: "Many", label: "Product Families" },
+    { icon: <SlidersHorizontal size={34} />, number: "Flexible", label: "Selection Criteria" },
+    { icon: <FileSearch size={34} />, number: "Clear", label: "Specification Review" },
+    { icon: <Building2 size={34} />, number: "Wide", label: "Healthcare Use Cases" },
   ];
 
   return (
@@ -33,10 +17,10 @@ export default function StatsSection() {
           <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-10">
             {stats.map((item, index) => (
               <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 50 }}
+                key={item.label}
+                initial={{ opacity: 0, y: 35 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.15 }}
+                transition={{ duration: 0.45, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 className="text-center"
               >

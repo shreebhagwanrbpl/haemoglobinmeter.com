@@ -1,5 +1,5 @@
 import AboutPage from "@/app/about/page";
-import { fetchDistrictData } from "@/lib/data-fetcher";
+import { fetchDistrictData } from "@/lib/data-fetcher-server";
 import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }) {
@@ -11,8 +11,8 @@ export async function generateMetadata({ params }) {
   const stateName = districtData.state || "India";
 
   return {
-    title: `About Our Haemoglobin Diagnostics Practice in ${districtName} | Biomedical Equipment Partner`,
-    description: `Learn about Raj Biosis in ${districtName}, ${stateName}. We deliver trusted diagnostic and medical laboratory technologies with precise support.`,
+    title: `About Our Biomedical Product Catalogue in ${districtName} | Raj Biosis`,
+    description: `Explore Raj Biosis products and catalogue support in ${districtName}, ${stateName}, covering laboratory, diagnostic and other biomedical requirements.`,
     alternates: {
       canonical: `https://haemoglobinmeter.com/${district}/about`,
     },

@@ -1,5 +1,5 @@
 import ProductsPage from "@/app/items/page";
-import { fetchDistrictData } from "@/lib/data-fetcher";
+import { fetchDistrictData } from "@/lib/data-fetcher-server";
 import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }) {
@@ -29,4 +29,4 @@ export default async function Page({ params }) {
   const city = districtData.district;
 
   return <ProductsPage district={district} city={city} />;
-}
+}

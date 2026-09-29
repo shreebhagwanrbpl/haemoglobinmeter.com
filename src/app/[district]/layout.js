@@ -1,4 +1,4 @@
-import { fetchDistrictData } from "@/lib/data-fetcher";
+import { fetchDistrictData } from "@/lib/data-fetcher-server";
 import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }) {
@@ -17,16 +17,16 @@ export async function generateMetadata({ params }) {
   const url = `https://haemoglobinmeter.com/${district}`;
 
   return {
-    title: `Biomedical & Diagnostic Equipment Supplier in ${districtName} | Raj Biosis`,
+    title: `Biomedical Products & Laboratory Supplies in ${districtName} | Raj Biosis`,
 
-    description: `Raj Biosis supplies diagnostic machines, laboratory equipment, reagents and biomedical products in ${districtName}, ${districtData.state || "India"}.`,
+    description: `Explore biomedical products, laboratory supplies, diagnostic equipment, reagents and consumables for healthcare requirements in ${districtName}, ${districtData.state || "India"}.`,
 
     keywords: [
-      `Biomedical Equipment ${districtName}`,
-      `Diagnostic Machines ${districtName}`,
-      `Laboratory Equipment ${districtName}`,
-      `Pathology Equipment ${districtName}`,
-      `Biomedical Supplier ${districtName}`,
+      `Biomedical Products ${districtName}`,
+      `Laboratory Supplies ${districtName}`,
+      `Diagnostic Products ${districtName}`,
+      `Medical Consumables ${districtName}`,
+      `Biomedical Catalogue ${districtName}`,
     ],
 
     robots: {
@@ -40,7 +40,7 @@ export async function generateMetadata({ params }) {
 
     openGraph: {
       title: `Biomedical Equipment in ${districtName}`,
-      description: `Diagnostic laboratory equipment supplier in ${districtName}.`,
+      description: `Browse biomedical products and laboratory supplies for varied healthcare requirements in ${districtName}.`,
       url,
       type: "website",
     },

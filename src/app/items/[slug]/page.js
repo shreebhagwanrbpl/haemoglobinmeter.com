@@ -74,4 +74,4 @@ export default async function Page({ params }) {
     }
 
     return <ProductDetails slug={slug} initialProduct={product} />;
-}
+}

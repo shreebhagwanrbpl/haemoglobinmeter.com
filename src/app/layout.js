@@ -5,21 +5,21 @@ import { Toaster } from "react-hot-toast";
 
 export const metadata = {
   metadataBase: new URL("https://haemoglobinmeter.com"),
-  title: "Clinical Haemoglobin Meters & Diagnostic Solutions | Raj Biosis",
-  description: "Explore high-precision clinical haemoglobinometers, automated cell counters, and point-of-care (POC) blood diagnostics for hospitals and pathology clinics.",
+  title: "Biomedical Products, Laboratory Equipment & Diagnostic Supplies | Raj Biosis",
+  description: "Browse a broad biomedical catalogue covering laboratory instruments, diagnostic products, reagents, test kits, consumables, monitoring devices and related supplies.",
   keywords: [
-    "Clinical Haemoglobin Meter",
-    "Professional Haemoglobinometer",
-    "POC Haemoglobin Analyzer",
-    "Blood Haemoglobin Testing",
-    "Portable Haemoglobinometer",
-    "Automated Hb Meter",
-    "Hospital Haemoglobin Meter",
-    "Diagnostics Haemoglobin Testing"
+    "Biomedical Products",
+    "Laboratory Equipment",
+    "Diagnostic Equipment",
+    "Medical Laboratory Supplies",
+    "Diagnostic Test Kits",
+    "Laboratory Reagents",
+    "Biomedical Consumables",
+    "Patient Monitoring Equipment"
   ],
   openGraph: {
-    title: "Clinical Haemoglobin Meters & Diagnostic Solutions | Raj Biosis",
-    description: "Supplier of clinical-grade haemoglobinometers and automated hematology testing systems.",
+    title: "Biomedical Products & Laboratory Supplies | Raj Biosis",
+    description: "A multi-category catalogue for laboratory equipment, diagnostics, reagents, kits, consumables and biomedical supplies.",
     url: "https://haemoglobinmeter.com",
     siteName: "Raj Biosis",
     images: [
@@ -35,8 +35,8 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Clinical Haemoglobin Meters & Diagnostic Solutions | Raj Biosis",
-    description: "Clinical-grade haemoglobinometers and diagnostic systems across India.",
+    title: "Biomedical Products & Laboratory Supplies | Raj Biosis",
+    description: "Biomedical equipment, diagnostic products and laboratory supplies for varied healthcare requirements.",
     images: ["/logo.png"],
   },
   alternates: {

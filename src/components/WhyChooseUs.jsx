@@ -1,29 +1,33 @@
 "use client";
 import { motion } from "framer-motion";
-import { ShieldCheck, Microscope, HeartPulse, BadgeCheck } from "lucide-react";
+import { Boxes, SearchCheck, Layers3, Headset } from "lucide-react";
 import SectionTitle from "./SectionTitle";
 
 export default function WhyChooseUs() {
   const features = [
     {
-      icon: <Microscope size={30} />,
-      title: "Innovative Diagnostics",
-      description: "Advanced optical and electrochemical detection systems for precise hemoglobin profiling.",
+      icon: <Boxes size={30} />,
+      title: "A Wider Product Mix",
+      description:
+        "Find instruments, kits, reagents, consumables, monitoring devices and laboratory accessories across one catalogue.",
     },
     {
-      icon: <ShieldCheck size={30} />,
-      title: "Clinical Standards",
-      description: "Certified diagnostics systems designed to satisfy stringent healthcare quality protocols.",
+      icon: <SearchCheck size={30} />,
+      title: "Specification-Led Selection",
+      description:
+        "Review products according to parameters, intended use, format, capacity and other practical requirements.",
     },
     {
-      icon: <HeartPulse size={30} />,
-      title: "Patient-First Focus",
-      description: "Supporting clinics with rapid POC analysis systems to facilitate quick treatment decisions.",
+      icon: <Layers3 size={30} />,
+      title: "Useful for Different Setups",
+      description:
+        "The range is suited to hospitals, diagnostic centres, laboratories, clinics, research units and institutional buyers.",
     },
     {
-      icon: <BadgeCheck size={30} />,
-      title: "Reliable Support",
-      description: "On-site calibration, technician training, and prompt troubleshooting support.",
+      icon: <Headset size={30} />,
+      title: "Enquiry Assistance",
+      description:
+        "Share a single item or a multi-product requirement and get help identifying the appropriate catalogue options.",
     },
   ];
 
@@ -31,18 +35,18 @@ export default function WhyChooseUs() {
     <section className="section-padding bg-white">
       <div className="container-custom">
         <SectionTitle
-          badge="Why Labs Select Our Hb Solutions"
-          title="Premier Diagnostic Innovation"
-          description="We deliver advanced hemoglobinometers and hematology systems, ensuring precision calibration and reliable support."
+          badge="Why Use This Catalogue"
+          title="One Place to Explore Biomedical Requirements"
+          description="The catalogue is organised around the many products used in healthcare and laboratory environments, not around a single test or device."
           center
         />
         <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-8 mt-16">
           {features.map((item, index) => (
             <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 40 }}
+              key={item.title}
+              initial={{ opacity: 0, y: 35 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.15 }}
+              transition={{ duration: 0.45, delay: index * 0.1 }}
               viewport={{ once: true }}
               className="bg-slate-50 p-8 rounded-[28px] border border-slate-100 hover:-translate-y-2 transition-all duration-300 card-shadow"
             >

@@ -1,6 +1,6 @@
 import ProductDetails from "../../../items/[slug]/ProductDetails";
 import { fetchFullCatalog } from "@/lib/data-fetcher-server";
-import { fetchDistrictData } from "@/lib/data-fetcher";
+import { fetchDistrictData } from "@/lib/data-fetcher-server";
 import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }) {
@@ -67,4 +67,4 @@ export default async function Page({ params }) {
             initialProduct={product}
         />
     );
-}
+}
