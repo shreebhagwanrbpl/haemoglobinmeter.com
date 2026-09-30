@@ -2,6 +2,9 @@ import { fetchFullCatalog } from "@/lib/data-fetcher-server";
 import ProductsClient from "@/app/items/ProductsClient";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const makeSlug = (text = "") =>
     text
         .toLowerCase()

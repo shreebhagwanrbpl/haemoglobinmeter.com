@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { db, doc, collection, getDoc, getDocs, addDoc, onSnapshot } from "@/lib/firestore-shim";
+import { WEBSITE_ID } from "@/lib/catalog-utils";
 
 import toast from "react-hot-toast";
 import {
@@ -23,6 +24,7 @@ export default function ContactPage() {
   const [customMapUrl, setCustomMapUrl] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
+  const [submittedSuccess, setSubmittedSuccess] = useState(false);
   const pathname = usePathname();
 
   const pathParts = pathname.split("/").filter(Boolean);
@@ -52,39 +54,44 @@ export default function ContactPage() {
     const phoneRegex = /^[6-9]\d{9}$/;
 
     if (!form.name.trim()) {
-      return toast.error("Name is required");
+      return toast.error("Please enter your name");
     }
 
     if (!emailRegex.test(form.email)) {
-      return toast.error("Enter valid email");
+      return toast.error("Please enter a valid email address");
     }
 
     if (!phoneRegex.test(form.phone)) {
-      return toast.error("Enter valid mobile number");
+      return toast.error("Please enter a valid 10-digit mobile number");
     }
 
     if (!form.message.trim()) {
-      return toast.error("Message is required");
+      return toast.error("Please write your inquiry message");
     }
 
     try {
       setSubmitting(true);
+      setSubmittedSuccess(false);
 
       await addDoc(
         collection(
           db,
           "websitesQueries",
-          "haemoglobinmetercom",
+          WEBSITE_ID,
           "contactQueries"
         ),
         {
           ...form,
+          district: currentDistrict || "",
           createdAt: new Date(),
         }
       );
 
-      toast.success("Message submitted successfully");
+      toast.success("Thank you! Your inquiry has been submitted successfully.", {
+        duration: 5000,
+      });
 
+      setSubmittedSuccess(true);
       setForm({
         name: "",
         email: "",
@@ -93,11 +100,12 @@ export default function ContactPage() {
       });
     } catch (err) {
       console.error(err);
-      toast.error("Something went wrong");
+      toast.error("Failed to submit inquiry. Please try again or call us directly.");
     } finally {
       setSubmitting(false);
     }
   };
+
 
   useEffect(() => {
     const loadDistrict = async () => {
@@ -108,7 +116,7 @@ export default function ContactPage() {
           doc(
             db,
             "websites",
-            "haemoglobinmetercom",
+            WEBSITE_ID,
             "districts",
             currentDistrict
           )
@@ -132,7 +140,7 @@ export default function ContactPage() {
           doc(
             db,
             "websites",
-            "haemoglobinmetercom",
+            WEBSITE_ID,
             "pages",
             "contact"
           )
@@ -156,6 +164,7 @@ export default function ContactPage() {
 
     loadContact();
   }, []);
+
 
   const normalizeKey = (value) =>
     String(value ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -419,6 +428,16 @@ export default function ContactPage() {
             </p>
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+              {submittedSuccess && (
+                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3 text-emerald-800 text-sm font-medium animate-fadeIn">
+                  <span className="text-xl">✅</span>
+                  <div>
+                    <p className="font-semibold text-emerald-900">Inquiry Received Successfully!</p>
+                    <p className="text-xs text-emerald-700 mt-0.5">Our diagnostic specialist will contact you shortly.</p>
+                  </div>
+                </div>
+              )}
+
               <input
                 type="text"
                 name="name"

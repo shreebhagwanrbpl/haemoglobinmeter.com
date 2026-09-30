@@ -38,6 +38,7 @@ export default function ProductDetails({ slug, district, initialProduct }) {
 
     const [submitting, setSubmitting] =
         useState(false);
+    const [submittedSuccess, setSubmittedSuccess] = useState(false);
     const [downloading, setDownloading] = useState(false);
     const [brochureImage, setBrochureImage] = useState("");
     const [contactData, setContactData] = useState({
@@ -200,30 +201,31 @@ export default function ProductDetails({ slug, district, initialProduct }) {
 
         if (!form.name.trim()) {
             return toast.error(
-                "Name is required"
+                "Please enter your name"
             );
         }
 
         if (!emailRegex.test(form.email)) {
             return toast.error(
-                "Enter valid email"
+                "Please enter a valid email address"
             );
         }
 
         if (!phoneRegex.test(form.phone)) {
             return toast.error(
-                "Enter valid mobile number"
+                "Please enter a valid 10-digit mobile number"
             );
         }
 
         try {
             setSubmitting(true);
+            setSubmittedSuccess(false);
 
             await addDoc(
                 collection(
                     db,
                     "websitesQueries",
-                    "haemoglobinmetercom",
+                    WEBSITE_ID,
                     "productQueries"
                 ),
                 {
@@ -232,14 +234,18 @@ export default function ProductDetails({ slug, district, initialProduct }) {
                     productSlug: product.slug,
                     brand: product.brand || "",
                     model: product.model || "",
+                    district: district || "",
+                    city: cityName || "",
                     createdAt: new Date(),
                 }
             );
 
             toast.success(
-                "Your enquiry has been submitted successfully."
+                "Thank you! Your quote inquiry has been submitted successfully.",
+                { duration: 5000 }
             );
 
+            setSubmittedSuccess(true);
             setForm({
                 name: "",
                 email: "",
@@ -248,7 +254,7 @@ export default function ProductDetails({ slug, district, initialProduct }) {
         } catch (error) {
             console.error(error);
             toast.error(
-                "Something went wrong"
+                "Failed to submit inquiry. Please try again or call us directly."
             );
         } finally {
             setSubmitting(false);
@@ -980,8 +986,15 @@ ${product?.desc}
                                 onSubmit={handleSubmit}
                                 className="space-y-5"
                             >
-
-
+                                {submittedSuccess && (
+                                    <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3 text-emerald-800 text-sm font-medium animate-fadeIn">
+                                        <span className="text-xl">✅</span>
+                                        <div>
+                                            <p className="font-semibold text-emerald-900">Enquiry Sent Successfully!</p>
+                                            <p className="text-xs text-emerald-700 mt-0.5">Our biomedical sales specialist will contact you with the best price quote.</p>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <input
                                     type="text"

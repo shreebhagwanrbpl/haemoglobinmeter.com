@@ -2,6 +2,9 @@ import ProductDetails from "./ProductDetails";
 import { fetchFullCatalog } from "@/lib/data-fetcher-server";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function generateMetadata({ params }) {
     const { slug } = await params;
 

@@ -248,11 +248,11 @@ export default function HeroSection({ city }) {
   };
 
   return (
-    <section className="py-4 sm:py-6 lg:py-8 bg-slate-50/70">
+    <section className="py-4 sm:py-6 lg:py-8 bg-slate-50/80">
       <div className="container-custom">
         {/* Main Panoramic Hero Chassis */}
         <div
-          className="relative rounded-[28px] sm:rounded-[36px] overflow-hidden shadow-[0_20px_60px_rgba(15,23,42,0.18)] min-h-[420px] sm:min-h-[460px] lg:h-[480px] flex items-center bg-slate-950"
+          className="relative rounded-[28px] sm:rounded-[36px] overflow-hidden shadow-[0_25px_70px_rgba(15,23,42,0.22)] min-h-[540px] sm:min-h-[580px] lg:min-h-[560px] xl:min-h-[580px] flex items-center bg-slate-950 border border-slate-800/60"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
@@ -275,7 +275,7 @@ export default function HeroSection({ city }) {
                     loop
                     muted
                     playsInline
-                    className="w-full h-full object-cover object-center"
+                    className="w-full h-full object-cover object-right lg:object-center"
                   />
                 ) : currentMedia.isStatic ? (
                   <Image
@@ -283,14 +283,14 @@ export default function HeroSection({ city }) {
                     alt={currentMedia.name || "Biomedical Showcase"}
                     fill
                     priority
-                    className="object-cover object-center"
+                    className="object-cover object-right lg:object-center"
                     sizes="100vw"
                   />
                 ) : (
                   <img
                     src={currentMedia.url}
                     alt={currentMedia.name || `Slide ${currentIndex + 1}`}
-                    className="w-full h-full object-cover object-center"
+                    className="w-full h-full object-cover object-right lg:object-center"
                     loading="eager"
                     onError={(e) => {
                       e.currentTarget.onerror = null;
@@ -303,12 +303,14 @@ export default function HeroSection({ city }) {
           </AnimatePresence>
 
           {/* ================= RICH DYNAMIC GRADIENT OVERLAYS ================= */}
-          {/* Left-to-right deep contrast gradient to make text razor-sharp */}
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/75 to-transparent w-full lg:w-3/4 z-10 pointer-events-none" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/30 z-10 pointer-events-none" />
+          {/* Left-to-right solid protective backdrop mask to guarantee razor-sharp readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/92 sm:via-slate-950/85 to-transparent w-full lg:w-[68%] xl:w-[62%] z-10 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/40 z-10 pointer-events-none" />
+          {/* Subtle cyan glow in the dark section */}
+          <div className="absolute top-0 left-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none z-10" />
 
           {/* ================= FOREGROUND DYNAMIC CONTENT ================= */}
-          <div className="relative z-20 w-full px-6 sm:px-10 lg:px-16 py-10 lg:py-14 max-w-3xl">
+          <div className="relative z-20 w-full px-6 sm:px-10 lg:px-14 xl:px-16 py-12 sm:py-14 lg:py-16 max-w-3xl">
             {loading ? (
               <div className="space-y-4 animate-pulse">
                 <div className="h-8 bg-white/20 rounded-full w-48" />
@@ -324,21 +326,22 @@ export default function HeroSection({ city }) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
+                className="flex flex-col justify-center"
               >
                 {/* Dynamic Category Pill Badge */}
-                <div className="inline-flex items-center gap-2 bg-sky-500/20 backdrop-blur-md border border-sky-400/30 text-sky-200 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-4 shadow-sm">
-                  <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
+                <div className="inline-flex items-center gap-2 bg-sky-500/15 backdrop-blur-md border border-sky-400/30 text-sky-300 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-5 shadow-sm w-fit">
+                  <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
                   <Boxes size={15} className="text-sky-300" />
                   <span>Biomedical & Diagnostic Catalogue</span>
                 </div>
 
                 {/* Dynamic Title */}
                 {heroTitle && (
-                  <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold text-white leading-[1.18] tracking-tight drop-shadow-md">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] xl:text-[44px] font-extrabold text-white leading-[1.18] tracking-tight drop-shadow-md">
                     {heroTitle}
                     {city && (
-                      <span className="block text-xl sm:text-2xl lg:text-3xl text-sky-300 font-bold mt-2">
-                        Serving {city}
+                      <span className="block text-lg sm:text-2xl lg:text-3xl text-sky-300 font-bold mt-2.5">
+                        Serving {city} & Nationwide
                       </span>
                     )}
                   </h1>
@@ -346,32 +349,48 @@ export default function HeroSection({ city }) {
 
                 {/* Dynamic Description */}
                 {heroDesc && (
-                  <p className="mt-4 text-slate-200 text-sm sm:text-base lg:text-lg leading-relaxed max-w-xl font-normal drop-shadow-sm">
+                  <p className="mt-4 sm:mt-5 text-slate-200/90 text-sm sm:text-base lg:text-[17px] leading-relaxed max-w-2xl font-normal drop-shadow-sm">
                     {heroDesc}
                   </p>
                 )}
 
                 {/* Action Buttons (Dynamic Text, Static Links) */}
                 {(btn1Label || btn2Label) && (
-                  <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-7 sm:mt-8">
+                  <div className="flex flex-wrap items-center gap-3.5 sm:gap-4 mt-8 sm:mt-9">
                     {btn1Label && (
                       <Link href={makeLink("/items")}>
-                        <button className="bg-sky-600 hover:bg-sky-500 text-white font-semibold px-6 sm:px-7 py-3.5 rounded-full shadow-lg shadow-sky-600/30 flex items-center justify-center gap-2 transition hover:scale-105 active:scale-95 text-sm sm:text-base">
+                        <button className="bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold px-7 sm:px-8 py-3.5 rounded-full shadow-[0_10px_30px_rgba(14,165,233,0.35)] flex items-center justify-center gap-2.5 transition-all duration-300 hover:scale-105 active:scale-95 text-sm sm:text-base">
                           <span>{btn1Label}</span>
-                          <ArrowRight size={17} />
+                          <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                         </button>
                       </Link>
                     )}
 
                     {btn2Label && (
                       <Link href={makeLink("/contact")}>
-                        <button className="bg-white/15 hover:bg-white/25 backdrop-blur-md text-white border border-white/30 font-semibold px-6 sm:px-7 py-3.5 rounded-full transition hover:scale-105 active:scale-95 text-sm sm:text-base">
+                        <button className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/25 hover:border-white/40 font-semibold px-6 sm:px-7 py-3.5 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 text-sm sm:text-base shadow-sm">
                           <span>{btn2Label}</span>
                         </button>
                       </Link>
                     )}
                   </div>
                 )}
+
+                {/* Quick Quality & Trust Highlights Strip */}
+                <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-8 pt-6 border-t border-white/10 text-xs sm:text-sm text-slate-300">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    <span>ISO & CE Certified Quality</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+                    <span>Pan-India Supply & Support</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                    <span>Direct OEM Warranty</span>
+                  </div>
+                </div>
               </motion.div>
             )}
           </div>

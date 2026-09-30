@@ -1,9 +1,9 @@
 import "server-only";
 import { DatabaseSync } from "node:sqlite";
-import path from "node:path";
 import fs from "node:fs";
+import { resolveSqliteDbPath } from "./sqlite-path";
 
-const DB_PATH = process.env.SQLITE_DB_PATH || path.resolve(process.cwd(), "../SuperAdminRBPL/data/catalog.db");
+const DB_PATH = resolveSqliteDbPath();
 let db;
 
 function getDb() {
@@ -36,8 +36,9 @@ export function parseData(value) {
 }
 
 export function getDocument(exactPath) {
-  return queryDocuments({ exactPath })[0] || null;
+  return queryDocuments({ path: exactPath })[0] || null;
 }
+
 
 export function getDocuments(collectionPath) {
   return queryDocuments({ collectionPath });

@@ -27,6 +27,7 @@ import {
 } from "react-icons/fa";
 
 import { fetchFullCatalog } from "@/lib/data-fetcher";
+import { WEBSITE_ID } from "@/lib/catalog-utils";
 
 export default function Footer() {
   const [contactInfo, setContactInfo] = useState([]);
@@ -65,15 +66,16 @@ export default function Footer() {
           doc(
             db,
             "websites",
-            "haemoglobinmetercom",
+            WEBSITE_ID,
             "pages",
             "contact"
           )
         );
 
         if (snap.exists()) {
+          const docData = snap.data() || {};
           setContactInfo(
-            snap.data().contactInfo || []
+            Array.isArray(docData.contactInfo) ? docData.contactInfo : (Array.isArray(docData) ? docData : [])
           );
         }
 
@@ -100,7 +102,7 @@ export default function Footer() {
           doc(
             db,
             "websites",
-            "haemoglobinmetercom",
+            WEBSITE_ID,
             "districts",
             district
           )
@@ -117,6 +119,7 @@ export default function Footer() {
     loadDistrict();
   }, [district]);
 
+
   /* =========================================================
      LOAD CATEGORIES
   ========================================================= */
@@ -124,23 +127,28 @@ export default function Footer() {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const catalog =
-          await fetchFullCatalog();
+        const catalog = await fetchFullCatalog();
 
-        const uniqueCategories =
-          Array.from(
-            new Set(
-              catalog
-                .map(
-                  (item) => item.category
-                )
-                .filter(Boolean)
-            )
-          );
+        const categorySet = new Set();
+        const list = [];
 
-        setCategories(
-          uniqueCategories.slice(0, 7)
-        );
+        // Collect all dynamic categories
+        catalog.forEach((item) => {
+          if (item?.category && !categorySet.has(item.category)) {
+            categorySet.add(item.category);
+            list.push(item.category);
+          }
+        });
+
+        // Collect all dynamic subcategories
+        catalog.forEach((item) => {
+          if (item?.subCategory && !categorySet.has(item.subCategory)) {
+            categorySet.add(item.subCategory);
+            list.push(item.subCategory);
+          }
+        });
+
+        setCategories(list.slice(0, 8));
       } catch (err) {
         console.error(
           "Error loading categories in footer:",
@@ -402,7 +410,6 @@ export default function Footer() {
             <div className="flex w-fit flex-col gap-3 text-slate-600">
 
               {categories.map((cat) => (
-
                 <Link
                   key={cat}
                   href={makeLink(
@@ -419,17 +426,7 @@ export default function Footer() {
                 >
                   {cat}
                 </Link>
-
               ))}
-
-              {categories.length === 0 && (
-                <>
-                  <p>Diagnostic Equipment</p>
-                  <p>Laboratory Solutions</p>
-                  <p>Biomedical Instruments</p>
-                  <p>Maintenance Support</p>
-                </>
-              )}
 
             </div>
 
@@ -465,6 +462,7 @@ export default function Footer() {
                     flex-shrink-0
                   "
                 >
+
 
                   <MapPin
                     size={24}

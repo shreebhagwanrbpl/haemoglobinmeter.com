@@ -1,44 +1,85 @@
 import { NextResponse } from "next/server";
-import { getDocument, getDocuments, getWebsiteDocument, queryDocuments } from "@/lib/sqliteDb";
-import { WEBSITE_ID, normalizeWebsiteId, isVisibleForWebsite } from "@/lib/catalog-utils";
+import { WEBSITE_ID, normalizeSiteDataParams } from "@/lib/catalog-utils";
+import { fetchRemoteCatalogApi } from "@/lib/catalog-api-remote";
+import { getWebsiteDocument, getDocument, queryDocuments } from "@/lib/sqliteDb";
 
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const fetchCache = "force-no-store";
-
-const headers = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" };
-function response(data, status = 200) { return NextResponse.json(data, { status, headers }); }
+const headers = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+  Pragma: "no-cache",
+};
 
 export async function GET(request) {
   try {
-    const { searchParams } = new URL(request.url);
-    if (searchParams.get("districts") === "1") {
-      const rows = queryDocuments({ likePath: "websites/%/%/districts/%" });
-      return response(rows.map((r) => ({ id: r.doc_id, ...(r.data || {}) })));
+    const incoming = new URL(request.url);
+    const params = normalizeSiteDataParams(incoming.searchParams);
+    const websiteId = params.get("websiteId") || WEBSITE_ID;
+    const type = params.get("type");
+
+    let payload = null;
+    try {
+      const upstream = await fetchRemoteCatalogApi(`/api/site-data?${params.toString()}`);
+      if (upstream.ok) {
+        payload = await upstream.json();
+      }
+    } catch (err) {
+      // Upstream fetch failed, will try local SQLite
     }
-    const collection = searchParams.get("collection");
-    if (collection) {
-      const rows = getDocuments(collection);
-      return response(rows.filter((r) => isVisibleForWebsite(r.data || {}, WEBSITE_ID)).map((r) => ({ id: r.doc_id, data: r.data })));
-    }
-    let p = searchParams.get("path") || "";
-    if (p.startsWith("__website__/")) {
-      const pagePath = p.replace("__website__/", "");
-      const rows = queryDocuments({ likePath: `websites/%/%/${pagePath}` });
-      const normalized = normalizeWebsiteId(WEBSITE_ID);
-      const hit = rows.find((r) => String(r.path).split("/").length >= 4 && normalizeWebsiteId(String(r.path).split("/")[2]) === normalized);
-      return response(hit?.data || null);
-    }
-    // Admin stores known website pages under the grouped SQLite path:
-    // websites/{companyId}/{websiteId}/pages/{pageType}.
-    // Keep legacy exact-path support, then resolve grouped paths by website ID.
-    let row = getDocument(p);
-    if (!row) {
-      const parts = p.split("/").filter(Boolean);
-      if (parts[0] === "websites" && parts.length === 4 && parts[2] === "pages") {
-        row = getWebsiteDocument(parts[1], parts[3]);
+
+    // If remote returned non-empty data, return it
+    if (payload && payload.success !== false) {
+      if (Array.isArray(payload.districts) && payload.districts.length > 0) {
+        return NextResponse.json(payload.districts, { status: 200, headers });
+      }
+      if (payload.data && typeof payload.data === "object" && Object.keys(payload.data).length > 0) {
+        return NextResponse.json(payload.data, { status: 200, headers });
       }
     }
-    return response(row?.data || null);
-  } catch (e) { return response({ error: e.message }, 500); }
+
+    // Fallback to SQLite DB if local/vps catalog.db has the data
+    try {
+      if (type === "home" || type === "services" || type === "contact" || type === "about") {
+        const row = getWebsiteDocument(websiteId, type);
+        if (row?.data && Object.keys(row.data).length > 0) {
+          return NextResponse.json(row.data, { status: 200, headers });
+        }
+      } else if (type === "district") {
+        const district = params.get("district");
+        if (district) {
+          const rows = queryDocuments({ likePath: `websites/%/${websiteId}/districts/${district.toLowerCase()}` });
+          if (rows[0]?.data) return NextResponse.json(rows[0].data, { status: 200, headers });
+        }
+      } else if (type === "districts") {
+        const rows = queryDocuments({ likePath: `websites/%/${websiteId}/districts/%` });
+        if (rows.length > 0) {
+          return NextResponse.json(rows.map((r) => ({ id: r.doc_id, ...(r.data || {}) })), { status: 200, headers });
+        }
+      } else if (type === "doc") {
+        const docPath = params.get("path");
+        if (docPath) {
+          const row = getDocument(docPath);
+          if (row?.data) return NextResponse.json(row.data, { status: 200, headers });
+        }
+      }
+    } catch (e) {
+      // SQLite fallback not available or failed
+    }
+
+    if (payload && typeof payload === "object") {
+      if (Array.isArray(payload.districts)) return NextResponse.json(payload.districts, { status: 200, headers });
+      if (Object.prototype.hasOwnProperty.call(payload, "data")) return NextResponse.json(payload.data, { status: 200, headers });
+      return NextResponse.json(payload, { status: 200, headers });
+    }
+
+    return NextResponse.json(null, { status: 200, headers });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unable to fetch SuperAdmin site data" },
+      { status: 502, headers }
+    );
+  }
 }
+

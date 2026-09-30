@@ -1,7 +1,7 @@
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Toaster } from "react-hot-toast";
+import ToasterProvider from "@/components/ToasterProvider";
 
 export const metadata = {
   metadataBase: new URL("https://haemoglobinmeter.com"),
@@ -48,18 +48,12 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="antialiased" suppressHydrationWarning>
+        <ToasterProvider />
         <Navbar />
-        <main>
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 3000,
-            }}
-          />
-          {children}
-        </main>
+        <main>{children}</main>
         <Footer />
       </body>
     </html>
   );
 }
+
