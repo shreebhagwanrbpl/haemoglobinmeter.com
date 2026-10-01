@@ -2,6 +2,9 @@ import ProductsPage from "@/app/items/page";
 import { fetchDistrictData } from "@/lib/data-fetcher-server";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function generateMetadata({ params }) {
   const { district } = await params;
   const districtData = await fetchDistrictData(district);

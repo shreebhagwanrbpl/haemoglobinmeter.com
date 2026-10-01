@@ -1169,61 +1169,7 @@ ${product?.desc}
 
 
 
-                            {/* Specifications Table */}
-                            <div className="mt-10 overflow-x-auto">
 
-                                <table className="w-full border border-[#E8C8D0]">
-
-
-                                    <tbody>
-
-
-                                        {[
-                                            ["Brand", product.brand],
-                                            ["Model", product.model],
-                                            ["Usage", product.usage],
-                                            ["Automation", product.automation],
-                                            ["Capacity", product.capacity],
-                                            ["Throughput", product.throughput],
-                                        ].map(([label, value], index) => (
-
-                                            <tr key={index}>
-
-
-                                                <td className="
-              border 
-              border-[#E8C8D0]
-              p-3
-              font-semibold
-              text-[#2D1B21]
-              bg-[#FFF8F9]
-            ">
-                                                    {label}
-                                                </td>
-
-
-                                                <td className="
-              border 
-              border-[#E8C8D0]
-              p-3
-              text-[#6B4A54]
-            ">
-                                                    {value || "N/A"}
-                                                </td>
-
-
-                                            </tr>
-
-                                        ))}
-
-
-                                    </tbody>
-
-
-                                </table>
-
-
-                            </div>
 
 
 

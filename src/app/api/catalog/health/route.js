@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { WEBSITE_ID, normalizeCatalogPayload } from "@/lib/catalog-utils";
-import { fetchRemoteCatalogApi, getRemoteCatalogBaseUrl } from "@/lib/catalog-api-remote";
+import { normalizeCatalogPayload } from "@/lib/catalog-utils";
+import { getCatalog, CMS_BASE, getWebsiteId } from "@/lib/cms";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,14 +10,23 @@ const headers = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age
 
 export async function GET() {
   try {
-    const base = getRemoteCatalogBaseUrl();
-    const upstream = await fetchRemoteCatalogApi(`/api/catalog?websiteId=${encodeURIComponent(WEBSITE_ID)}&companyId=rajbiosis`);
-    const payload = await upstream.json();
-    if (!upstream.ok || payload?.success === false) {
-      return NextResponse.json({ ok: false, mode: "shared-superadmin-api", source: base, error: payload?.error || `SuperAdmin API returned HTTP ${upstream.status}` }, { status: 502, headers });
+    const websiteId = getWebsiteId();
+    const payload = await getCatalog();
+    if (!payload || payload.success === false) {
+      return NextResponse.json(
+        { ok: false, mode: "live-central-mongodb-cms", source: CMS_BASE, websiteId, error: payload?.error || "Central CMS returned failure" },
+        { status: 502, headers }
+      );
     }
-    return NextResponse.json({ ok: true, mode: "shared-superadmin-api", source: base, websiteId: WEBSITE_ID, companyId: payload?.companyId || "rajbiosis", catalogCount: normalizeCatalogPayload(payload).length }, { headers });
+    const products = normalizeCatalogPayload(payload);
+    return NextResponse.json(
+      { ok: true, mode: "live-central-mongodb-cms", source: CMS_BASE, websiteId, catalogCount: products.length },
+      { headers }
+    );
   } catch (error) {
-    return NextResponse.json({ ok: false, mode: "shared-superadmin-api", source: getRemoteCatalogBaseUrl(), error: error instanceof Error ? error.message : "Unknown catalog health error" }, { status: 502, headers });
+    return NextResponse.json(
+      { ok: false, mode: "live-central-mongodb-cms", source: CMS_BASE, error: error instanceof Error ? error.message : "Unknown catalog health error" },
+      { status: 502, headers }
+    );
   }
 }

@@ -17,6 +17,7 @@ import { Toaster, toast } from "react-hot-toast";
 import SectionTitle from "@/components/SectionTitle";
 // import CTASection from "@/components/CTASection";
 import ProductCard from "@/components/ProductCard";
+import { fetchFullCatalog } from "@/lib/data-fetcher";
 
 // 1. Memoized Product Link Component
 const ProductLink = memo(function ProductLink({ item, category, scrollToProduct }) {
@@ -167,6 +168,7 @@ export default function ProductsClient({
   filterCategory = null,
   filterBrand = null,
 }) {
+  const [productsList, setProductsList] = useState(initialProducts);
   const [categorySearch, setCategorySearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [productSearch, setProductSearch] = useState("");
@@ -175,6 +177,32 @@ export default function ProductsClient({
   const [openedSubCategories, setOpenedSubCategories] = useState({});
   const [pendingScroll, setPendingScroll] = useState(null);
   const [showTopButton, setShowTopButton] = useState(false);
+
+  // Sync state when initialProducts prop updates
+  useEffect(() => {
+    setProductsList(initialProducts);
+  }, [initialProducts]);
+
+  // Periodic background sync with Central CMS so admin assign/unassign updates in real time
+  useEffect(() => {
+    let isMounted = true;
+    const loadLiveCatalog = async () => {
+      try {
+        const live = await fetchFullCatalog();
+        if (isMounted && Array.isArray(live)) {
+          setProductsList(live);
+        }
+      } catch (err) {
+        console.error("Live catalog sync error:", err);
+      }
+    };
+
+    const timer = setInterval(loadLiveCatalog, 4000);
+    return () => {
+      isMounted = false;
+      clearInterval(timer);
+    };
+  }, []);
 
   // Debounce search term updates to make search typing instant
   useEffect(() => {
@@ -190,7 +218,7 @@ export default function ProductsClient({
     const query = productSearch.trim().toLowerCase();
 
     // Apply server-provided category or brand filters first
-    let baseProducts = initialProducts;
+    let baseProducts = productsList;
     if (filterCategory) {
       baseProducts = baseProducts.filter(
         (item) => makeSlug(item.category) === makeSlug(filterCategory)

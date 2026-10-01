@@ -1,24 +1,137 @@
+
 export const WEBSITE_ID = "haemoglobinmetercom";
 
+/**
+ * Normalize website IDs without merging different spellings.
+ *
+ * haemoglobinmetercom !== hemoglobinmetercom
+ */
 export function normalizeWebsiteId(value = "") {
   return String(value || "")
+    .trim()
     .toLowerCase()
     .replace(/^https?:\/\//, "")
     .replace(/^www\./, "")
     .replace(/[.\-\s]/g, "");
 }
 
-export function isVisibleForWebsite(data = {}, websiteId = WEBSITE_ID) {
-  if (!data || data.isPublished === false) return false;
-  const status = String(data.status || "").toLowerCase();
-  if (status === "inactive" || status === "draft") return false;
-  if (!Array.isArray(data.websiteIds)) return true;
-  if (data.websiteIds.length === 0) return false;
-  const wanted = normalizeWebsiteId(websiteId);
-  return data.websiteIds.some((id) => {
-    const v = normalizeWebsiteId(id);
-    return v === "all" || v === wanted;
+function getVisibilityObjects(item) {
+  if (!item || typeof item !== "object") return [];
+  return [
+    item,
+    item.data && typeof item.data === "object"
+      ? item.data
+      : null,
+  ].filter(Boolean);
+}
+
+function getAssignmentList(object) {
+  const fields = [
+    "websiteIds",
+    "websites",
+    "assignedWebsites",
+    "companyWebsites",
+  ];
+
+  for (const field of fields) {
+    if (Object.prototype.hasOwnProperty.call(object, field)) {
+      if (Array.isArray(object[field])) {
+        return object[field];
+      }
+
+      // Do not treat a malformed assignment field as unrestricted.
+      if (object[field] != null) {
+        return [];
+      }
+    }
+  }
+
+  return null;
+}
+
+function websiteListIncludes(list, wanted) {
+  if (!Array.isArray(list) || list.length === 0) {
+    return false;
+  }
+
+  return list.some((item) => {
+    const value =
+      typeof item === "string"
+        ? item
+        : item?.websiteId || item?.id || item?.name || "";
+
+    const normalized = normalizeWebsiteId(value);
+
+    return normalized === "all" || normalized === wanted;
   });
+}
+
+/**
+ * Determines whether a product/category is visible on a website.
+ *
+ * If both the outer document and nested data contain assignment lists,
+ * both must allow the website. This prevents a stale duplicate list from
+ * keeping a product visible after its assignment is removed.
+ */
+export function isVisibleForWebsite(
+  item = {},
+  websiteId = WEBSITE_ID
+) {
+  if (!item || typeof item !== "object") return false;
+
+  const objects = getVisibilityObjects(item);
+  const wanted = normalizeWebsiteId(websiteId);
+
+  if (!wanted) return false;
+
+  // Hide if either the outer document or nested data marks it unavailable.
+  for (const object of objects) {
+    if (object.isPublished === false) return false;
+    if (object.visibility === false) return false;
+
+    const status = String(object.status || "").toLowerCase();
+
+    if (
+      [
+        "inactive",
+        "draft",
+        "deleted",
+        "unassigned",
+        "disabled",
+      ].includes(status)
+    ) {
+      return false;
+    }
+  }
+
+  // Check every explicitly configured assignment list.
+  const lists = objects
+    .map(getAssignmentList)
+    .filter((list) => list !== null);
+
+  if (lists.length > 0) {
+    return lists.every((list) =>
+      websiteListIncludes(list, wanted)
+    );
+  }
+
+  // Also support records that use a single websiteId field.
+  const singleIds = objects
+    .filter(
+      (object) =>
+        typeof object.websiteId === "string" &&
+        object.websiteId.trim() !== ""
+    )
+    .map((object) => normalizeWebsiteId(object.websiteId));
+
+  if (singleIds.length > 0) {
+    return singleIds.every(
+      (id) => id === "all" || id === wanted
+    );
+  }
+
+  // Preserve compatibility with legacy records without assignment fields.
+  return true;
 }
 
 export function makeSlug(text = "") {
@@ -30,60 +143,143 @@ export function makeSlug(text = "") {
     .replace(/-+/g, "-");
 }
 
-/** Normalize both legacy array responses and the SuperAdmin grouped catalog response.
- * The live VPS API returns { success, categories }, with products nested in each
- * category/subcategory. Site pages expect a flat product array.
+/**
+ * Normalize array and grouped catalog responses.
+ * Filters categories, subcategories and products by website visibility.
  */
-export function normalizeCatalogPayload(payload) {
-  if (Array.isArray(payload)) return payload;
-  if (!payload || typeof payload !== "object") return [];
-  if (payload.success === false) {
-    throw new Error(payload.error || "Catalog API reported success=false");
+export function normalizeCatalogPayload(
+  payload,
+  websiteId = WEBSITE_ID
+) {
+  if (!payload || typeof payload !== "object") {
+    return [];
   }
-  if (Array.isArray(payload.products)) return payload.products;
+
+  if (payload.success === false) {
+    throw new Error(
+      payload.error || "Catalog API reported success=false"
+    );
+  }
 
   const products = [];
   const seen = new Set();
-  const addProducts = (items, categoryName, subCategoryName) => {
+
+  const addProducts = (
+    items,
+    categoryName = "",
+    subCategoryName = ""
+  ) => {
     if (!Array.isArray(items)) return;
+
     for (const item of items) {
       if (!item || typeof item !== "object") continue;
-      const title = item.title || item.name || item.productName;
+
+      if (!isVisibleForWebsite(item, websiteId)) continue;
+
+      const title =
+        item.title ||
+        item.name ||
+        item.productName ||
+        item.data?.title ||
+        item.data?.name;
+
       if (!title) continue;
+
       const product = {
         ...item,
         title,
-        category: item.category || categoryName || "Other Products",
-        subCategory: item.subCategory || item.subcategory || subCategoryName || categoryName || "Other Products",
+        category:
+          item.category ||
+          item.data?.category ||
+          categoryName ||
+          "Other Products",
+        subCategory:
+          item.subCategory ||
+          item.subcategory ||
+          item.data?.subCategory ||
+          item.data?.subcategory ||
+          subCategoryName ||
+          categoryName ||
+          "Other Products",
       };
-      const key = `${String(product.slug || title).toLowerCase()}|${String(title).toLowerCase()}`;
+
+      const key =
+        `${String(product.slug || product.data?.slug || title).toLowerCase()}|` +
+        `${String(title).toLowerCase()}`;
+
       if (seen.has(key)) continue;
+
       seen.add(key);
       products.push(product);
     }
   };
 
-  for (const category of Array.isArray(payload.categories) ? payload.categories : []) {
-    const categoryName = category?.category || category?.name || category?.title || "Other Products";
+  if (Array.isArray(payload)) {
+    addProducts(payload);
+    return products;
+  }
+
+  if (Array.isArray(payload.products)) {
+    addProducts(payload.products);
+    return products;
+  }
+
+  for (const category of Array.isArray(payload.categories)
+    ? payload.categories
+    : []) {
+    if (!isVisibleForWebsite(category, websiteId)) continue;
+
+    const categoryName =
+      category?.category ||
+      category?.name ||
+      category?.title ||
+      "Other Products";
+
     addProducts(category?.products, categoryName, categoryName);
-    for (const subcategory of Array.isArray(category?.subcategories) ? category.subcategories : []) {
-      const subName = subcategory?.subCategory || subcategory?.subcategory || subcategory?.name || subcategory?.title || "";
+
+    for (const subcategory of Array.isArray(category?.subcategories)
+      ? category.subcategories
+      : []) {
+      if (!isVisibleForWebsite(subcategory, websiteId)) continue;
+
+      const subName =
+        subcategory?.subCategory ||
+        subcategory?.subcategory ||
+        subcategory?.name ||
+        subcategory?.title ||
+        "";
+
       addProducts(subcategory?.products, categoryName, subName);
       addProducts(subcategory?.items, categoryName, subName);
-      addProducts(subcategory?.categoryProducts, categoryName, subName);
+      addProducts(
+        subcategory?.categoryProducts,
+        categoryName,
+        subName
+      );
     }
+
     addProducts(category?.items, categoryName, categoryName);
-    addProducts(category?.categoryProducts, categoryName, categoryName);
+    addProducts(
+      category?.categoryProducts,
+      categoryName,
+      categoryName
+    );
   }
+
   return products;
 }
 
-/** Normalize incoming site-data query parameters so that Firestore/path style
- * queries correctly map to the SuperAdmin VPS API requirements (which expects `type`).
+/**
+ * Normalize incoming site-data query parameters for the Admin API.
  */
 export function normalizeSiteDataParams(inputParams) {
-  const params = inputParams instanceof URLSearchParams ? new URLSearchParams(inputParams) : new URLSearchParams(inputParams || {});
+  const params =
+    inputParams instanceof URLSearchParams
+      ? new URLSearchParams(inputParams)
+      : new URLSearchParams(inputParams || {});
+
   const websiteId = params.get("websiteId") || WEBSITE_ID;
+
   params.set("websiteId", websiteId);
 
   const rawPath = params.get("path");
@@ -98,15 +294,22 @@ export function normalizeSiteDataParams(inputParams) {
 
   if (rawPath) {
     params.delete("path");
+
     const normalizedPath = rawPath.replace(/\\/g, "/");
 
-    const pageMatch = normalizedPath.match(/(?:^|\/)pages\/([^/]+)$/);
+    const pageMatch = normalizedPath.match(
+      /(?:^|\/)pages\/([^/]+)$/
+    );
+
     if (pageMatch) {
       params.set("type", pageMatch[1]);
       return params;
     }
 
-    const districtMatch = normalizedPath.match(/(?:^|\/)districts\/([^/]+)$/);
+    const districtMatch = normalizedPath.match(
+      /(?:^|\/)districts\/([^/]+)$/
+    );
+
     if (districtMatch) {
       params.set("type", "district");
       params.set("district", districtMatch[1]);
@@ -125,6 +328,7 @@ export function normalizeSiteDataParams(inputParams) {
 
   if (rawCollection) {
     params.delete("collection");
+
     const normalizedCol = rawCollection.replace(/\\/g, "/");
 
     if (/(?:^|\/)districts\/?$/.test(normalizedCol)) {
@@ -132,7 +336,9 @@ export function normalizeSiteDataParams(inputParams) {
       return params;
     }
 
-    const colName = normalizedCol.split("/").filter(Boolean).pop() || "all";
+    const colName =
+      normalizedCol.split("/").filter(Boolean).pop() || "all";
+
     params.set("type", colName);
     return params;
   }

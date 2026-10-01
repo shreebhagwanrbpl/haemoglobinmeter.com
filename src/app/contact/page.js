@@ -134,35 +134,18 @@ export default function ContactPage() {
   }, [currentDistrict]);
 
   useEffect(() => {
-    const loadContact = async () => {
-      try {
-        const snap = await getDoc(
-          doc(
-            db,
-            "websites",
-            WEBSITE_ID,
-            "pages",
-            "contact"
-          )
-        );
-
-        if (snap.exists()) {
-          const docData = snap.data();
-          // Keep the full document: admin panels may save details as an array,
-          // a nested object, or flat fields such as phone/email/address.
-          setContactInfo(docData);
-          if (docData.mapUrl || docData.mapEmbedUrl || docData.googleMap || docData.map) {
-            setCustomMapUrl(docData.mapUrl || docData.mapEmbedUrl || docData.googleMap || docData.map);
-          }
+    const ref = doc(db, "websites", WEBSITE_ID, "pages", "contact");
+    const unsubscribe = onSnapshot(ref, (snap) => {
+      if (snap && snap.exists()) {
+        const docData = snap.data() || {};
+        setContactInfo(docData);
+        if (docData.mapUrl || docData.mapEmbedUrl || docData.googleMap || docData.map) {
+          setCustomMapUrl(docData.mapUrl || docData.mapEmbedUrl || docData.googleMap || docData.map);
         }
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLoading(false);
       }
-    };
-
-    loadContact();
+      setLoading(false);
+    });
+    return unsubscribe;
   }, []);
 
 

@@ -54,18 +54,28 @@ export default function ServicesPage() {
   useEffect(() => {
     const ref = doc(db, "__website__", "pages", "services");
     const unsubscribe = onSnapshot(ref, (snap) => {
-      if (!snap?.exists?.()) return;
+      if (!snap || !snap.exists()) {
+        setServices(fallbackServices);
+        return;
+      }
       const data = snap.data() || {};
       const rawServices = Array.isArray(data) ? data : Array.isArray(data.services) ? data.services : [];
-      const dynamicServices = rawServices.map((item, index) => {
-        const Icon = [Search, ListChecks, FileText, Truck, Settings2, MessageSquareText][index % 6];
-        return {
-          icon: <Icon size={30} />,
-          title: String(item?.title ?? item?.name ?? item?.serviceTitle ?? "").trim(),
-          description: String(item?.desc ?? item?.description ?? item?.details ?? item?.serviceDescription ?? item?.serviceDesc ?? "").trim(),
-        };
-      }).filter((item) => item.title && item.description);
-      if (dynamicServices.length) setServices(dynamicServices);
+      if (rawServices.length === 0) {
+        setServices(fallbackServices);
+        return;
+      }
+      const dynamicServices = rawServices
+        .map((item, index) => {
+          const Icon = [Search, ListChecks, FileText, Truck, Settings2, MessageSquareText][index % 6];
+          return {
+            icon: <Icon size={30} />,
+            title: String(item?.title ?? item?.name ?? item?.serviceTitle ?? "").trim(),
+            description: String(item?.desc ?? item?.description ?? item?.details ?? item?.serviceDescription ?? item?.serviceDesc ?? "").trim(),
+          };
+        })
+        .filter((item) => item.title && item.description);
+
+      setServices(dynamicServices.length > 0 ? dynamicServices : fallbackServices);
     });
     return unsubscribe;
   }, []);

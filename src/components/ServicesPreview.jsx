@@ -30,9 +30,12 @@ export default function ServicesPreview() {
   useEffect(() => {
     const ref = doc(db, "__website__", "pages", "services");
     const unsubscribe = onSnapshot(ref, (snap) => {
-      if (!snap?.exists?.()) return;
+      if (!snap || !snap.exists()) {
+        setServices(FALLBACK_SERVICES);
+        return;
+      }
       const dynamicServices = normalizeServices(snap.data());
-      if (dynamicServices.length) setServices(dynamicServices);
+      setServices(dynamicServices.length > 0 ? dynamicServices : FALLBACK_SERVICES);
     });
     return unsubscribe;
   }, []);

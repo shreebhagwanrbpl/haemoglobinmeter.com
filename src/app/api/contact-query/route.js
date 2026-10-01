@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { DatabaseSync } from "node:sqlite";
-import fs from "node:fs";
-import { resolveSqliteDbPath } from "@/lib/sqlite-path";
-import { WEBSITE_ID } from "@/lib/catalog-utils";
+import { submitInquiry, getWebsiteId } from "@/lib/cms";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,19 +8,9 @@ export const revalidate = 0;
 export async function POST(request) {
   try {
     const body = await request.json();
-    const dbPath = resolveSqliteDbPath();
-    if (!fs.existsSync(dbPath)) {
-      throw new Error(`SQLite database not found: ${dbPath}`);
-    }
-
-    const db = new DatabaseSync(dbPath);
-    const websiteId = body.websiteId || WEBSITE_ID;
-    const collectionPath = `websitesQueries/${websiteId}/contactQueries`;
+    const websiteId = body.websiteId || getWebsiteId();
     const docId = `contact_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const now = new Date();
-    const nowIso = now.toISOString();
-    const timestamp = Date.now();
-    const seconds = Math.floor(timestamp / 1000);
 
     const record = {
       id: docId,
@@ -35,37 +22,29 @@ export async function POST(request) {
       city: String(body.city || "").trim(),
       district: String(body.district || "").trim(),
       websiteId,
-      createdAt: {
-        __sqliteType: "timestamp",
-        value: nowIso,
-        seconds: seconds,
-        nanoseconds: 0,
-      },
-      timestamp: timestamp,
       date: now.toLocaleDateString("en-IN", { day: "2-digit", month: "2-digit", year: "numeric" }),
       dateStr: now.toLocaleString("en-IN"),
+      ...body,
     };
 
-    const data = JSON.stringify(record);
-    const docPath = `${collectionPath}/${docId}`;
+    const result = await submitInquiry(record);
 
-    db.prepare(
-      `INSERT INTO documents (path, collection_path, doc_id, data, updated_at) VALUES (?, ?, ?, ?, ?)`
-    ).run(docPath, collectionPath, docId, data, timestamp);
-
-    db.close();
+    if (result && result.ok !== false) {
+      return NextResponse.json(
+        { ok: true, success: true, id: docId, docId, ...result },
+        { status: 200, headers: { "Cache-Control": "no-store" } }
+      );
+    }
 
     return NextResponse.json(
-      { ok: true, success: true, id: docId, docId },
-      { status: 200, headers: { "Cache-Control": "no-store" } }
+      { ok: false, success: false, error: result?.error || "Failed to submit inquiry to Central CMS" },
+      { status: 500 }
     );
   } catch (e) {
-    console.error("[contact-query] Error saving query:", e);
+    console.error("[contact-query] Error saving query to CMS:", e);
     return NextResponse.json(
       { ok: false, success: false, error: e.message },
       { status: 500 }
     );
   }
 }
-
-
