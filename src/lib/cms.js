@@ -5,16 +5,30 @@ export const DEFAULT_COMPANY_ID = "rajbiosis";
 // Auto-detect clean websiteId from package.json, environment, or hostname
 export function getWebsiteId() {
   let name = "";
-  if (typeof window !== "undefined" && window.location?.hostname) {
-    name = window.location.hostname;
+  if (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_WEBSITE_ID) {
+    name = process.env.NEXT_PUBLIC_WEBSITE_ID;
   } else if (typeof process !== "undefined" && process.env?.WEBSITE_ID) {
     name = process.env.WEBSITE_ID;
-  } else if (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_WEBSITE_ID) {
-    name = process.env.NEXT_PUBLIC_WEBSITE_ID;
+  } else if (
+    typeof window !== "undefined" &&
+    window.location?.hostname &&
+    !["localhost", "127.0.0.1", "0.0.0.0"].includes(window.location.hostname) &&
+    !window.location.hostname.endsWith(".local")
+  ) {
+    name = window.location.hostname;
   } else {
     name = DEFAULT_WEBSITE_ID;
   }
-  return name.toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/[^a-z0-9]/g, "") || DEFAULT_WEBSITE_ID;
+
+  const clean = name
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/[^a-z0-9]/g, "");
+
+  return (clean && clean !== "localhost" && clean !== "127001" && clean !== "0000")
+    ? clean
+    : DEFAULT_WEBSITE_ID;
 }
 
 // 1. Fetch Products & Categories (Instant Live)
